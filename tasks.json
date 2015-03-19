@@ -2,11 +2,11 @@
 	"item": [
 		{
 			"title": "Task One",
-			"isDone": "false"
+			"isDone": false
 		},
 		{
 			"title": "Task Two",
-			"isDone": "false"
+			"isDone": false
 		}	
 	]
 }
