@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+<head>
+
+<script type="text/javascript" src="knockout-3.3.0.js"></script>
+
+<!-- View Model -->
+<script> 
+// Class to represent a row in the seat reservations grid
+function SeatReservation(name, initialMeal) {
+    var self = this;
+    self.name = name;
+    self.meal = ko.observable(initialMeal);
+	self.formattedPrice = ko.computed(function() {
+		var price = self.meal().price;
+		return price ? "$" + price.toFixed(2) : "None";
+	});
+}
+
+// Overall viewmodel for this screen, along with initial state
+function ReservationsViewModel() {
+    var self = this;
+
+    // Non-editable catalog data - would come from the server
+    self.availableMeals = [
+        { mealName: "Standard (sandwich)", price: 0 },
+        { mealName: "Premium (lobster)", price: 34.95 },
+        { mealName: "Ultimate (whole zebra)", price: 290 }
+    ];    
+
+    // Editable data
+    self.seats = ko.observableArray([
+        new SeatReservation("Steve", self.availableMeals[0]),
+        new SeatReservation("Bert", self.availableMeals[0])
+    ]);
+	
+	self.addNewPassenger = function() {
+		self.seats.push(new SeatReservation("", self.availableMeals[0]));
+	};
+	
+	self.removePassenger = function(seat) {
+		self.seats.remove(seat);
+	};
+	
+	self.totalSurcharge = ko.computed(function() {
+		var total = 0;
+		for (var i = 0; i < self.seats().length; i++)
+			total += self.seats()[i].meal().price;
+		return total;
+	});
+	
+	self.totalSeats = ko.computed(function() {
+		return self.seats().length;
+	});
+}
+
+</script>
+
+</head>
+<body onLoad="ko.applyBindings(new ReservationsViewModel());">
+<h2>Your seat reservations</h2>
+
+<table>
+    <thead><tr>
+        <th>Passenger name</th><th>Meal</th><th>Surcharge</th><th></th>
+    </tr></thead>
+    <!-- Todo: Generate table body -->
+   <tbody data-bind="foreach: seats">
+    <tr>
+        <td><input data-bind="value: name" /></td>
+        <td><select data-bind="options: $root.availableMeals, value: meal, optionsText: 'mealName'"></select></td>
+        <td data-bind="text: formattedPrice"></td>
+		<td><a href="#" data-bind="click: $root.removePassenger">Remove Passenger</a></td>
+    </tr>    
+	</tbody>
+</table>
+<button data-bind="click: addNewPassenger, enable: seats().length < 5">Add Passenger</button>
+<hr>
+<h3 data-bind="visible: totalSurcharge() > 0">Total Surcharge: <span data-bind="text: totalSurcharge().toFixed(2)"></span></h3>
+<h3 data-bind="visible: totalSeats() > 0">Total Seats: <span data-bind="text: totalSeats"></span></h3>
+
+</body>
+</html>
